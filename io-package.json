@@ -3,6 +3,9 @@
 		"name": "deyesun",
 		"version": "0.0.2",
 		"news": {
+			"0.0.2": {
+				"en": "Refresh values during startup"
+			},
 			"0.0.1": {
 				"en": "initial release",
 				"de": "Erstveröffentlichung",
