@@ -96,14 +96,9 @@ class Deyesun extends utils.Adapter {
 
 	async RefreshValues() {
 		try {
-			adapter.log.info("IP: " + adapter.ip);
-			adapter.log.info("Username: " + adapter.username);
-
 			const request = http.request(
 				{ hostname: adapter.ip, path: "/status.html", auth: adapter.username + ":" + adapter.password },
 				function (response) {
-					console.log("STATUS: " + response.statusCode);
-					console.log("HEADERS: " + JSON.stringify(response.headers));
 					response.setEncoding("utf8");
 					response.on("data", function (chunk) {
 						//console.log('BODY: ' + chunk);
@@ -111,9 +106,6 @@ class Deyesun extends utils.Adapter {
 						for (let i = 0; i < lines.length; i++) {
 							// console.debug(lines[i]);
 							if (lines[i].indexOf("var webdata_now_p") >= 0) {
-								adapter.log.info(
-									"Current: " + lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""),
-								);
 								// Ensure to not write missing values as 0
 								if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
 									const tmp = Number(lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""));
@@ -124,9 +116,6 @@ class Deyesun extends utils.Adapter {
 								}
 							}
 							if (lines[i].indexOf("var webdata_today_e") >= 0) {
-								adapter.log.info(
-									"Today: " + lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""),
-								);
 								// Ensure to not write missing values as 0
 								if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
 									const tmp = Number(lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""));
@@ -137,9 +126,6 @@ class Deyesun extends utils.Adapter {
 								}
 							}
 							if (lines[i].indexOf("var webdata_total_e") >= 0) {
-								adapter.log.info(
-									"Total: " + lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""),
-								);
 								// Ensure to not write missing values as 0
 								if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
 									const tmp = Number(lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""));
