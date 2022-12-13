@@ -90,6 +90,7 @@ class Deyesun extends utils.Adapter {
 			adapter.RefreshInterval = 600;
 			adapter.log.info("Refresh Interval is too low. Updates are available each 10 minutes");
 		}
+		await adapter.RefreshValues();
 		adapter.refreshIntervalObject = setInterval(adapter.RefreshValues, adapter.RefreshInterval * 1000);
 	}
 
