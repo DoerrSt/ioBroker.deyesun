@@ -1,0 +1,26 @@
+{
+	"i18n": true,
+	"type": "panel",
+	"items": {
+		"ip": {
+			"type": "text",
+			"label": "IP Address",
+			"newLine": false
+		},
+		"username": {
+			"type": "text",
+			"label": "Username",
+			"newLine": false
+		},
+		"password": {
+			"type": "text",
+			"label": "Password",
+			"newLine": false
+		},
+		"RefreshInterval": {
+			"type": "text",
+			"label": "Refresh Interval (seconds)",
+			"newLine": false
+		}
+	}
+}
