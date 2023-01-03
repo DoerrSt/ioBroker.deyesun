@@ -1,8 +1,11 @@
 {
 	"common": {
 		"name": "deyesun",
-		"version": "0.0.2",
+		"version": "0.0.3",
 		"news": {
+			"0.0.3": {
+				"en": "Fixed crash if the inverter is not reachable"
+			},
 			"0.0.2": {
 				"en": "Refresh values during startup"
 			},
