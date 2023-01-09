@@ -1,8 +1,11 @@
 {
 	"common": {
 		"name": "deyesun",
-		"version": "0.0.3",
+		"version": "0.0.4",
 		"news": {
+			"0.0.4": {
+				"en": "Fixed crash if the inverter is not reachable"
+			},
 			"0.0.3": {
 				"en": "Fixed crash if the inverter is not reachable"
 			},

@@ -43,57 +43,61 @@ class Deyesun extends utils.Adapter {
 
 		// The adapters config (in the instance object everything under the attribute "native") is accessible via
 		// this.config:
-		adapter.username = this.config.username;
-		adapter.password = this.config.password;
-		adapter.ip = this.config.ip;
-		adapter.RefreshInterval = this.config.RefreshInterval;
-
-		adapter.log.debug("Create states...");
-
-		adapter.setObjectNotExists("Current", {
-			type: "state",
-			common: {
-				name: "Current",
-				role: "value",
-				read: true,
-				write: true,
-				type: "number",
-			},
-			native: {},
-		});
-
-		adapter.setObjectNotExists("Today", {
-			type: "state",
-			common: {
-				name: "Today",
-				role: "value",
-				read: true,
-				write: true,
-				type: "number",
-			},
-			native: {},
-		});
-
-		adapter.setObjectNotExists("Total", {
-			type: "state",
-			common: {
-				name: "Total",
-				role: "value",
-				read: true,
-				write: true,
-				type: "number",
-			},
-			native: {},
-		});
-
-		if (adapter.RefreshInterval < 600) {
-			adapter.RefreshInterval = 600;
-			adapter.log.info("Refresh Interval is too low. Updates are available each 10 minutes");
-		}
 		try {
-			await adapter.RefreshValues();
+			adapter.username = this.config.username;
+			adapter.password = this.config.password;
+			adapter.ip = this.config.ip;
+			adapter.RefreshInterval = this.config.RefreshInterval;
+
+			adapter.log.debug("Create states...");
+
+			adapter.setObjectNotExists("Current", {
+				type: "state",
+				common: {
+					name: "Current",
+					role: "value",
+					read: true,
+					write: true,
+					type: "number",
+				},
+				native: {},
+			});
+
+			adapter.setObjectNotExists("Today", {
+				type: "state",
+				common: {
+					name: "Today",
+					role: "value",
+					read: true,
+					write: true,
+					type: "number",
+				},
+				native: {},
+			});
+
+			adapter.setObjectNotExists("Total", {
+				type: "state",
+				common: {
+					name: "Total",
+					role: "value",
+					read: true,
+					write: true,
+					type: "number",
+				},
+				native: {},
+			});
+
+			if (adapter.RefreshInterval < 600) {
+				adapter.RefreshInterval = 600;
+				adapter.log.info("Refresh Interval is too low. Updates are available each 10 minutes");
+			}
+			try {
+				await adapter.RefreshValues();
+			} catch (error) {
+				adapter.log.debug("Error while refreshing values, inverter offline?: " + error);
+			}
 		} catch (error) {
-			adapter.log.debug("Error while refreshing values, inverter offline?: " + error);
+			adapter.log.error(error);
 		}
 		adapter.refreshIntervalObject = setInterval(adapter.RefreshValues, adapter.RefreshInterval * 1000);
 	}
@@ -103,57 +107,74 @@ class Deyesun extends utils.Adapter {
 			const request = http.request(
 				{ hostname: adapter.ip, path: "/status.html", auth: adapter.username + ":" + adapter.password },
 				function (response) {
-					response.setEncoding("utf8");
-					response.on("data", function (chunk) {
-						//console.log('BODY: ' + chunk);
-						const lines = chunk.split("\n");
-						for (let i = 0; i < lines.length; i++) {
-							// console.debug(lines[i]);
-							if (lines[i].indexOf("var webdata_now_p") >= 0) {
-								// Ensure to not write missing values as 0
-								if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
-									const tmp = Number(lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""));
-									adapter.setState("Current", {
-										val: tmp,
-										ack: true,
-									});
+					try {
+						response.setEncoding("utf8");
+						response.on("data", function (chunk) {
+							//console.log('BODY: ' + chunk);
+							const lines = chunk.split("\n");
+							for (let i = 0; i < lines.length; i++) {
+								// console.debug(lines[i]);
+								if (lines[i].indexOf("var webdata_now_p") >= 0) {
+									// Ensure to not write missing values as 0
+									if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
+										const tmp = Number(
+											lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""),
+										);
+										adapter.setState("Current", {
+											val: tmp,
+											ack: true,
+										});
+									}
+								}
+								if (lines[i].indexOf("var webdata_today_e") >= 0) {
+									// Ensure to not write missing values as 0
+									if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
+										const tmp = Number(
+											lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""),
+										);
+										adapter.setState("Today", {
+											val: tmp,
+											ack: true,
+										});
+									}
+								}
+								if (lines[i].indexOf("var webdata_total_e") >= 0) {
+									// Ensure to not write missing values as 0
+									if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
+										const tmp = Number(
+											lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""),
+										);
+										adapter.setState("Total", {
+											val: tmp,
+											ack: true,
+										});
+									}
 								}
 							}
-							if (lines[i].indexOf("var webdata_today_e") >= 0) {
-								// Ensure to not write missing values as 0
-								if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
-									const tmp = Number(lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""));
-									adapter.setState("Today", {
-										val: tmp,
-										ack: true,
-									});
-								}
-							}
-							if (lines[i].indexOf("var webdata_total_e") >= 0) {
-								// Ensure to not write missing values as 0
-								if (lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', "").trim != "") {
-									const tmp = Number(lines[i].split("=")[1].replaceAll(";", "").replaceAll('"', ""));
-									adapter.setState("Total", {
-										val: tmp,
-										ack: true,
-									});
-								}
-							}
-						}
-					});
+						});
+					} catch (error) {
+						adapter.log.error(error);
+					}
 				},
 				function (error) {
-					if (error.toString().indexOf("EHOSTUNREACH") >= 0) {
-						// Host seems to be offline
-						adapter.log.error("Host unreachable");
-						adapter.setState("Current", {
-							val: 0,
-							ack: true,
-						});
+					try {
+						if (error.toString().indexOf("EHOSTUNREACH") >= 0) {
+							// Host seems to be offline
+							adapter.log.error("Host unreachable");
+							adapter.setState("Current", {
+								val: 0,
+								ack: true,
+							});
+						}
+					} catch (error) {
+						adapter.log.error(error);
 					}
 				},
 			);
 			request.end();
+			request.on("error", function (e) {
+				console.error(e);
+			});
 		} catch (error) {
 			adapter.log.error(error);
 		}
